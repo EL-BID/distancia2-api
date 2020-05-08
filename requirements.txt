@@ -1,6 +1,15 @@
-django
+
+#Data Analisys
 numpy
-matplotlib
 pandas
 scipy
 cv2
+# matplotlib
+# jupyterlab
+# tqdm
+# seaborn
+# vidgear
+
+# Web Server
+django
+djangorestframework
