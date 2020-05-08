@@ -1,3 +1,4 @@
+import json
 from django.db import models
 
 
@@ -22,6 +23,12 @@ class Channel(models.Model):
     config = models.TextField()
     # latitude = models.FloatField()
     # longitude = models.FloatField()
+
+    def __str__(self):
+        return self.name
+
+    def get_config(self):
+        return json.loads(self.config)
 
 
 class Record(models.Model):

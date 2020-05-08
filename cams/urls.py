@@ -1,7 +1,12 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from . import views
+from cams import views
+
+router = DefaultRouter()
+router.register(r'cams', views.ChannelViewSet)
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('image_stream/<int:channel_id>/', views.image_stream, name='image_stream'),
+    path('', include(router.urls)),
 ]
