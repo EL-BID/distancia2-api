@@ -19,10 +19,11 @@ class Channel(models.Model):
     enabled = models.BooleanField(default=False)
     process_id = models.CharField(max_length=100)
     camera_interface = models.CharField(max_length=100)
+    live = models.BooleanField(default=False)
     last_connection = models.DateTimeField()
     config = models.TextField()
-    # latitude = models.FloatField()
-    # longitude = models.FloatField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
 
     def __str__(self):
         return self.name
@@ -35,9 +36,7 @@ class Record(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE,
         related_name='records', related_query_name='record')
-    # people_count = models.IntegerField()
-    # people_min = models.IntegerField()
-    # people_average = models.FloatField()
+    details = models.TextField()
 
 
 class Alarm(models.Model):

@@ -25,7 +25,12 @@ SECRET_KEY = 'z5q$4jn)0k=3l_mefx9re*g#@1g@$y6y^yr*xf0sa6+4%xol!*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+    CORS_ORIGIN_ALLOW_ALL = True
+else:
+    ALLOWED_HOSTS = ['.distancia2.com']
+    CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?distancia2\.com$', )
 
 
 # Application definition
@@ -38,14 +43,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Third party apps
+    'corsheaders',
     'rest_framework',
 
+    # Internal apps
     'cams.apps.CamsConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

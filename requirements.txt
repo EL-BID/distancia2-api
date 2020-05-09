@@ -12,4 +12,7 @@ cv2
 
 # Web Server
 django
+django-environ
+redis
+django-cors-headers
 djangorestframework

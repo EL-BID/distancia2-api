@@ -1,4 +1,8 @@
 from abc import ABC, abstractmethod
+
+import redis
+from redis.exceptions import TimeoutError
+import numpy as np
 import cv2
 
 def frame_generator(camera):
@@ -47,21 +51,31 @@ class LocalFileCamera(CameraInterface):
 
         return jpeg_frame.tobytes()
 
+
+class RedisCamera(CameraInterface):
+    def __init__(self, access_key, **kwargs):
+        self.key = access_key
+        self.client = redis.Redis(host='localhost', db=0, socket_connect_timeout=1)
+
+        try:
+            self.client.ping()
+        except TimeoutError:
+            message = 'No se puede conectar al servidor de Redis'
+            raise RefusedConnection(message)
+
+    def release(self):
+        self.client.close()
+
+    def get_frame(self):
+        raw_frame = self.client.get(self.key)
+
+        if not raw_frame:
+            message = f'No hay fotogramas disponibles para "{str(self.key)}"' 
+            raise ClosedConnection(message)
+
+        return raw_frame
+
 # class IPCamera(CameraInterface)
-#     def __init__(self, file_path, **kwargs):
-#         # input_file = 'sample1.mp4'
-#         self.camera = cv2.VideoCapture(file_path)
-
-#     def release(self):
-#         self.camera.release()
-
-#     def get_frame(self):
-#         ret, image = self.video.read()
-#         ret, jpeg = cv2.imencode('.jpg', image)
-
-#         return jpeg.tobytes()
-
-# class RemoteCamera(CameraInterface):
 #     def __init__(self, file_path, **kwargs):
 #         # input_file = 'sample1.mp4'
 #         self.camera = cv2.VideoCapture(file_path)
