@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # Third party apps
     'corsheaders',
     'rest_framework',
+    'django_extensions',
 
     # Internal apps
     'cams.apps.CamsConfig',
@@ -131,3 +132,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+NOTEBOOK_ARGUMENTS = [
+    '--ip', '0.0.0.0', 
+    '--allow-root',
+    '--no-browser', 
+]

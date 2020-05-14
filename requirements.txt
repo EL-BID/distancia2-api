@@ -11,8 +11,9 @@ cv2
 # vidgear
 
 # Web Server
+redis
 django
 django-environ
-redis
+django-extensions
 django-cors-headers
 djangorestframework

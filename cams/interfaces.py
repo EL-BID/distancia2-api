@@ -75,6 +75,7 @@ class RedisCamera(CameraInterface):
 
         return raw_frame
 
+
 # class IPCamera(CameraInterface)
 #     def __init__(self, file_path, **kwargs):
 #         # input_file = 'sample1.mp4'
@@ -88,6 +89,7 @@ class RedisCamera(CameraInterface):
 #         ret, jpeg = cv2.imencode('.jpg', image)
 
 #         return jpeg.tobytes()
+
 
 class RefusedConnection(Exception):
     pass
