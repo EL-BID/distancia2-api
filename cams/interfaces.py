@@ -43,7 +43,11 @@ class LocalFileCamera(Camera):
             message = 'No se pueden leer mas fotogramas'
             raise ClosedConnection(message)
 
-        successful_encode, jpeg_frame = cv2.imencode('.jpg', raw_frame)
+        return raw_frame
+
+    @staticmethod
+    def frame_to_jpg(frame):
+        successful_encode, jpeg_frame = cv2.imencode('.jpg', frame)
 
         if not successful_encode:
             message = 'No se puede codificar el fotograma'
@@ -87,14 +91,11 @@ class RedisCamera(Camera):
         return raw_frame
 
     def send_frame(self, frame):
-        raw_frame = self.client.get(self.key)
-        self.client.get(self.key)
+        successful_send = self.client.set(self.key, frame)
 
-        if not raw_frame:
-            message = f'No hay fotogramas disponibles para "{self.key}"' 
+        if not successful_send:
+            message = f'No pudo enviar el fotogama por "{self.key}"' 
             raise ClosedConnection(message)
-
-        return raw_frame
 
 
 # class IPCamera(Camera)
