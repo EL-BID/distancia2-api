@@ -11,19 +11,25 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import environ
+
+env = environ.Env()
+env.read_env('distancia2/devel.env')
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = environ.Path(__file__) - 2
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'z5q$4jn)0k=3l_mefx9re*g#@1g@$y6y^yr*xf0sa6+4%xol!*'
+SECRET_KEY = env('SECRET_KEY',
+    default='z5q$4jn)0k=3l_mefx9re*g#@1g@$y6y^yr*xf0sa6+4%xol!*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG', default=True)
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
@@ -92,7 +98,20 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'HOST': env('MYSQL_HOST', '127.0.0.1'),
+    #     'NAME': env('MYSQL_DATABASE'),
+    #     'USER': env('MYSQL_USERNAME'),
+    #     'PASSWORD': env('MYSQL_PASSWORD'),
+    # }
 }
+
+
+REDIS_HOST = env('REDIS_HOST')
+REDIS_DATABASE = env.int('REDIS_DATABASE')
+REDIS_USERNAME = env('REDIS_USERNAME')
+REDIS_PASSWORD = env('REDIS_PASSWORD')
 
 
 # Password validation
@@ -138,3 +157,13 @@ NOTEBOOK_ARGUMENTS = [
     '--allow-root',
     '--no-browser', 
 ]
+
+
+MODEL_PATH = env('MODEL_PATH')
+MODEL_NAMES = env('MODEL_NAMES')
+MODEL_WEIGHTS = env('MODEL_WEIGHTS')
+MODEL_CONFIG = env('MODEL_CONFIG')
+MODEL_ENABLE_CUDA = env.bool('MODEL_ENABLE_CUDA')
+MODEL_CONFIDENCE = env.float('MODEL_CONFIDENCE')
+MODEL_THRESHOLD = env.float('MODEL_THRESHOLD')
+MODEL_PEOPLE_HEIGHT = env.float('MODEL_PEOPLE_HEIGHT')

@@ -1,19 +1,18 @@
 
 #Data Analisys
-numpy
-pandas
-scipy
-cv2
+numpy==1.18.4
+pandas==1.0.3
+scipy==1.4.1
+# cv2
 # matplotlib
-# jupyterlab
-# tqdm
+# jupyterlab==2.1.2
 # seaborn
-# vidgear
 
 # Web Server
-redis
-django
-django-environ
-django-extensions
-django-cors-headers
-djangorestframework
+redis==3.5.1
+mysqlclient==1.4.6
+django==3.0.6
+django-environ==0.4.5
+django-extensions==2.2.9
+django-cors-headers==3.2.1
+djangorestframework==3.11.0

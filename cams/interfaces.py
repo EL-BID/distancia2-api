@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import redis
 from redis.exceptions import TimeoutError
-import numpy as np
+from django.conf import settings
 import cv2
 
 def frame_generator(camera):
@@ -12,7 +12,7 @@ def frame_generator(camera):
             b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
-class CameraInterface(ABC):
+class Camera(ABC):
     def __del__(self):
         self.release()
 
@@ -25,8 +25,8 @@ class CameraInterface(ABC):
         pass
 
 
-class LocalFileCamera(CameraInterface):
-    def __init__(self, file_path, **kwargs):
+class LocalFileCamera(Camera):
+    def __init__(self, file_path=None, **kwargs):
         self.camera = cv2.VideoCapture(file_path)
 
         if not self.camera.isOpened():
@@ -52,10 +52,20 @@ class LocalFileCamera(CameraInterface):
         return jpeg_frame.tobytes()
 
 
-class RedisCamera(CameraInterface):
-    def __init__(self, access_key, **kwargs):
+class RedisCamera(Camera):
+    client = None
+
+    def __init__(self, access_key=None, **kwargs):
+        if not access_key:
+            message = 'No se encuentra el access_key en la configuracion'
+            raise RefusedConnection(message)
+
         self.key = access_key
-        self.client = redis.Redis(host='localhost', db=0, socket_connect_timeout=1)
+        self.client = redis.Redis(
+            host=settings.REDIS_HOST,
+            db=settings.REDIS_DATABASE,
+            socket_connect_timeout=1
+        )
 
         try:
             self.client.ping()
@@ -64,19 +74,30 @@ class RedisCamera(CameraInterface):
             raise RefusedConnection(message)
 
     def release(self):
-        self.client.close()
+        if self.client:
+            self.client.close()
 
     def get_frame(self):
         raw_frame = self.client.get(self.key)
 
         if not raw_frame:
-            message = f'No hay fotogramas disponibles para "{str(self.key)}"' 
+            message = f'No hay fotogramas disponibles para "{self.key}"' 
+            raise ClosedConnection(message)
+
+        return raw_frame
+
+    def send_frame(self, frame):
+        raw_frame = self.client.get(self.key)
+        self.client.get(self.key)
+
+        if not raw_frame:
+            message = f'No hay fotogramas disponibles para "{self.key}"' 
             raise ClosedConnection(message)
 
         return raw_frame
 
 
-# class IPCamera(CameraInterface)
+# class IPCamera(Camera)
 #     def __init__(self, file_path, **kwargs):
 #         # input_file = 'sample1.mp4'
 #         self.camera = cv2.VideoCapture(file_path)

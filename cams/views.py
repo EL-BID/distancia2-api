@@ -1,4 +1,4 @@
-from django.http import Http404, HttpResponseServerError, StreamingHttpResponse
+from django.http import Http404, HttpResponseForbidden, StreamingHttpResponse
 from django.views.decorators import gzip
 from rest_framework import viewsets
 
@@ -14,12 +14,13 @@ def image_stream(request, channel_id):
         raise Http404('Este canal no existe')
 
     try:
-        camera_instance = getattr(interfaces, channel.camera_interface)(**channel.get_config())
+        camera_interface = interfaces.RedisCamera(**channel.get_config())
 
-        return StreamingHttpResponse(interfaces.frame_generator(camera_instance),
+        return StreamingHttpResponse(interfaces.frame_generator(camera_interface),
             content_type='multipart/x-mixed-replace; boundary=frame')
-    except HttpResponseServerError:
-        print("aborted")
+    except Exception as err:
+        print(err)
+        raise err
 
 
 class ChannelViewSet(viewsets.ReadOnlyModelViewSet):
