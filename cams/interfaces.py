@@ -27,7 +27,9 @@ class Camera(ABC):
 
 class LocalFileCamera(Camera):
     def __init__(self, file_path=None, **kwargs):
-        self.camera = cv2.VideoCapture(file_path)
+        self.camera = cv2.VideoCapture(
+            settings.BASE_DIR(file_path)
+        )
 
         if not self.camera.isOpened():
             message = 'No se puede leer el archivo ' + file_path

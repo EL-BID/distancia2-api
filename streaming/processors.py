@@ -19,7 +19,6 @@ COLOR_CLOSE_LINE = (36,60, 255)
 LIGHT_COLOR_TEXT = (255,255,255)
 DARK_COLOR_TEXT = (0, 0, 0)
 THICKNESS_LINE = 2
-SECURE_DISTANCE = 2
 
 class CamProcessor:
     def __init__(self):
@@ -27,10 +26,11 @@ class CamProcessor:
             'threshold': settings.MODEL_THRESHOLD,
             'confidence': settings.MODEL_CONFIDENCE,
             'people_height': settings.MODEL_PEOPLE_HEIGHT,
+            'secure_distance': settings.SECURE_DISTANCE
         }
 
-        weightsPath = os.path.join(settings.MODEL_PATH, settings.MODEL_WEIGHTS)
-        configPath = os.path.join(settings.MODEL_PATH, settings.MODEL_CONFIG)
+        weightsPath = settings.BASE_DIR(settings.MODEL_WEIGHTS_PATH)
+        configPath = settings.BASE_DIR(settings.MODEL_CONFIG_PATH)
         self.net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 
         if settings.MODEL_ENABLE_CUDA:
@@ -116,7 +116,7 @@ class CamProcessor:
             cv2.rectangle(image, edge_0, edge_1, COLOR_PEOPLE_BOX, THICKNESS_LINE)
 
         for line in distance_lines:
-            line_color = COLOR_CLOSE_LINE if line[4] < SECURE_DISTANCE else COLOR_FAR_LINE
+            line_color = COLOR_CLOSE_LINE if line[4] < self.args['secure_distance'] else COLOR_FAR_LINE
             image = cv2.line(image, line[2], line[3], line_color, THICKNESS_LINE)
 
             e = ((np.array(line[2])+np.array(line[3]))/2).astype(int)
@@ -131,14 +131,17 @@ class CamProcessor:
         amount_people = len(boxes)
 
         if amount_people > 1:
-            minimal_distance = min([x[4] for x in distance_lines])
-            average_distance = np.mean([x[4] for x in distance_lines])
+            minimal_distance = min([line[4] for line in distance_lines])
+            breaking_secure_distance = sum([line[4] < self.args['secure_distance'] for line in distance_lines])
+            average_distance = np.mean([line[4] for line in distance_lines])
         else:
             minimal_distance = 0
+            breaking_secure_distance = 0
             average_distance = 0
 
         return {
             'amount_people': amount_people,
+            'breaking_secure_distance': breaking_secure_distance,
             'minimal_distance': minimal_distance,
             'average_distance': average_distance,
         }

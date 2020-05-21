@@ -5,6 +5,7 @@ from cams import views
 
 router = DefaultRouter()
 router.register(r'cams', views.ChannelViewSet)
+router.register(r'records', views.RecordViewSet)
 
 urlpatterns = [
     path('image_stream/<int:channel_id>/', views.image_stream, name='image_stream'),

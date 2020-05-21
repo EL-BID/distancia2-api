@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
     # Third party apps
     'corsheaders',
+    'django_mysql',
     'rest_framework',
     'django_extensions',
 
@@ -99,6 +100,9 @@ DATABASES = {
         'NAME': env('MYSQL_DATABASE'),
         'USER': env('MYSQL_USERNAME'),
         'PASSWORD': env('MYSQL_PASSWORD'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
 
@@ -153,12 +157,15 @@ NOTEBOOK_ARGUMENTS = [
     '--no-browser', 
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
+}
 
-MODEL_PATH = env('MODEL_PATH')
-MODEL_NAMES = env('MODEL_NAMES')
-MODEL_WEIGHTS = env('MODEL_WEIGHTS')
-MODEL_CONFIG = env('MODEL_CONFIG')
+MODEL_WEIGHTS_PATH = env('MODEL_WEIGHTS_PATH')
+MODEL_CONFIG_PATH = env('MODEL_CONFIG_PATH')
 MODEL_ENABLE_CUDA = env.bool('MODEL_ENABLE_CUDA')
 MODEL_CONFIDENCE = env.float('MODEL_CONFIDENCE')
 MODEL_THRESHOLD = env.float('MODEL_THRESHOLD')
 MODEL_PEOPLE_HEIGHT = env.float('MODEL_PEOPLE_HEIGHT')
+SECURE_DISTANCE = env.int('SECURE_DISTANCE', 2)

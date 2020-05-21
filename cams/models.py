@@ -1,8 +1,12 @@
 import json
 import logging
+
+import numpy as np
 from django.db import models
+from distancia2.fields import JSONField
 
 logger = logging.getLogger()
+
 
 class ChannelManager(models.Manager):
     def get_and_lock(self, camera_interface, cameras_number):
@@ -59,16 +63,13 @@ class Channel(models.Model):
         choices=CAMERA_INTERFACE_CHOICES)
     live = models.BooleanField(default=False)
     last_connection = models.DateTimeField(blank=True, null=True)
-    config = models.TextField(default='{}')
+    config = JSONField()
     latitude = models.FloatField(default=0)
     longitude = models.FloatField(default=0)
     objects = ChannelManager()
 
     def __str__(self):
         return self.name
-
-    def get_config(self):
-        return json.loads(self.config)
 
     def attach(self, process_id):
         if Channel.objects.filter(pk=self.pk, state=Channel.STATE_ACTIVE).exists():
@@ -87,7 +88,14 @@ class Record(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE,
         related_name='records', related_query_name='record')
-    details = models.TextField()
+    amount_people = models.IntegerField()
+    breaking_secure_distance = models.IntegerField()
+    minimal_distance = models.FloatField()
+    average_distance = models.FloatField()
+    graphical = JSONField()
+
+    class Meta:
+        ordering = ['-date']
 
 
 class Alarm(models.Model):
@@ -97,3 +105,6 @@ class Alarm(models.Model):
     type = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
+
+    class Meta:
+        ordering = ['-date']
