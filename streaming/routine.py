@@ -1,3 +1,4 @@
+import time
 import socket
 import logging
 # import threading
@@ -8,39 +9,50 @@ from cams.models import Channel, Record, Alarm
 from streaming.processors import CamProcessor
 from streaming.utils import frame_to_jpg
 
-FORMAT = '%(asctime)-15s %(message)s'
-logging.basicConfig(level=logging.DEBUG, format=FORMAT)
-logger = logging.getLogger()
+LOGGING_FORMAT = '%(asctime)s [%(processName)s_%(thread)s]: %(message)s'
+logging.basicConfig(level=logging.DEBUG,
+    format=LOGGING_FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger('ProcesingRoutine')
 
+RETAKE_TIMEOUT = 60
+_quit = False
 def processing_routine(channel):
     input_config = channel.config
     if channel.credential:
         input_config['credential'] = channel.credential
 
-    input_camera = getattr(interfaces, channel.camera_interface)(**input_config)
-    redis_transmitter = interfaces.RedisCamera(channel.config.get('access_key'))
+    interface = getattr(interfaces, channel.camera_interface, None)
+    if not interface:
+        logger.error(f"No se consigue interface {channel.camera_interface}")
+        return
+
+    try:
+        input_camera = interface(**input_config)
+        redis_transmitter = interfaces.RedisCamera(channel.config.get('access_key'))
+    except interfaces.RefusedConnection as err:
+        logger.error(err)
+        time.sleep(RETAKE_TIMEOUT)
+        logger.info(f'Retaken channel {channel.name}')
+        return processing_routine(channel)
+
     processor = CamProcessor()
 
     channel.state = Channel.STATE_ACTIVE
     channel.save(update_fields=['state'])
     logger.debug(f"Attached to channel {channel.name}")
 
-    while True:
+    while not _quit:
         try:
             raw_frame = input_camera.get_frame()
             results = processor.inference(raw_frame)
 
-        except KeyboardInterrupt:
-            channel.state = Channel.STATE_INACTIVE
-            channel.save(update_fields=['state'])
-            logger.debug('Rutina interrumpida por teclado.')
-            break
-
         except interfaces.ClosedConnection as err:
             channel.state = Channel.STATE_FAILED
             channel.save(update_fields=['state'])
-            logger.error(err.message)
-            break
+            logger.error(err)
+            time.sleep(RETAKE_TIMEOUT)
+            logger.info(f'Retaken channel {channel.name}')
+            return processing_routine(channel)
 
         except Exception as err:
             channel.state = Channel.STATE_FAILED
@@ -56,19 +68,23 @@ def processing_routine(channel):
         Record.objects.create(graphical=results['graphical'],
             channel=channel, **results['statistical'])
 
+    channel.state = Channel.STATE_INACTIVE
+    channel.save(update_fields=['state'])
+    logger.info('Interrupted routine by keyboard.')
+
 def main(channel_id=None):
+    global _quit
     server_name = socket.gethostname()
 
     channels = Channel.objects.filter(enabled=True,
         process_id__startswith=server_name)
 
-    if channel_id:
-        processing_routine(channels[channel_id])
-    else:
-        with ThreadPoolExecutor(max_workers=len(channels)) as executor:
-            executor.map(processing_routine, channels)
-            # executor.submit(supervisor, index)
-
-
-if __name__ == "__main__":
-    main(0)
+    try:
+        if channel_id:
+            processing_routine(channels[channel_id])
+        else:
+            with ThreadPoolExecutor(max_workers=len(channels)) as executor:
+                executor.map(processing_routine, channels)
+                # executor.submit(supervisor, index)
+    except KeyboardInterrupt:
+        _quit = True

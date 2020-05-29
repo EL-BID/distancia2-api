@@ -129,7 +129,7 @@ class RTSPCamera(Camera):
 
     def get_frame(self):
         if self.last_frame is None:
-            message = 'No se pueden leer mas fotogramas'
+            message = 'Se ha cortado la comunicación'
             raise ClosedConnection(message)
 
         return self.last_frame
