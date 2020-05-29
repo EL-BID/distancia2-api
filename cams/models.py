@@ -40,6 +40,7 @@ class Channel(models.Model):
     STATE_FAILED = 'failed'
 
     LOCAL_FILE_INTERFACE = 'LocalFileCamera'
+    RTSP_INTERFACE = 'RTSPCamera'
     REDIS_INTERFACE = 'RedisCamera'
 
     STATE_CHOICES = [
@@ -51,6 +52,7 @@ class Channel(models.Model):
 
     CAMERA_INTERFACE_CHOICES = [
         (LOCAL_FILE_INTERFACE, LOCAL_FILE_INTERFACE),
+        (RTSP_INTERFACE, RTSP_INTERFACE),
         (REDIS_INTERFACE, REDIS_INTERFACE),
     ]
 
@@ -61,11 +63,12 @@ class Channel(models.Model):
     process_id = models.CharField(max_length=100, blank=True)
     camera_interface = models.CharField(max_length=100,
         choices=CAMERA_INTERFACE_CHOICES)
-    live = models.BooleanField(default=False)
     last_connection = models.DateTimeField(blank=True, null=True)
     config = JSONField()
     latitude = models.FloatField(default=0)
     longitude = models.FloatField(default=0)
+    credential = models.ForeignKey('RemoteCredential',
+        on_delete=models.SET_NULL, blank=True, null=True)
     objects = ChannelManager()
 
     def __str__(self):
@@ -80,6 +83,10 @@ class Channel(models.Model):
         self.state = Channel.STATE_ACTIVE
         self.save()
         return True
+
+    @property
+    def last_record(self):
+        return self.records.first()
 
     # def release(self)
 
@@ -108,3 +115,13 @@ class Alarm(models.Model):
 
     class Meta:
         ordering = ['-date']
+
+
+class RemoteCredential(models.Model):
+    host = models.CharField(max_length=256, blank=True, null=True)
+    port = models.IntegerField(blank=True, null=True)
+    username = models.CharField(max_length=256)
+    password = models.CharField(max_length=256)
+
+    def __str__(self):
+        return '{}: {}'.format(self.host, self.username)

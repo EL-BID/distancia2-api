@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import threading
 
 import redis
 from redis.exceptions import TimeoutError
@@ -47,16 +48,6 @@ class LocalFileCamera(Camera):
 
         return raw_frame
 
-    @staticmethod
-    def frame_to_jpg(frame):
-        successful_encode, jpeg_frame = cv2.imencode('.jpg', frame)
-
-        if not successful_encode:
-            message = 'No se puede codificar el fotograma'
-            raise Exception(message)
-
-        return jpeg_frame.tobytes()
-
 
 class RedisCamera(Camera):
     client = None
@@ -93,26 +84,55 @@ class RedisCamera(Camera):
         return raw_frame
 
     def send_frame(self, frame):
-        successful_send = self.client.set(self.key, frame)
+        successful_send = self.client.set(self.key, frame, ex=30)
 
         if not successful_send:
             message = f'No pudo enviar el fotogama por "{self.key}"' 
             raise ClosedConnection(message)
 
 
-# class IPCamera(Camera)
-#     def __init__(self, file_path, **kwargs):
-#         # input_file = 'sample1.mp4'
-#         self.camera = cv2.VideoCapture(file_path)
+class RTSPCamera(Camera):
+    last_frame = None
+    lock = threading.Lock()
 
-#     def release(self):
-#         self.camera.release()
+    def __init__(self, credential=None, **kwargs):
+        if not credential:
+            message = 'No posee ninguna credencial asociada'
+            raise RefusedConnection(message)
 
-#     def get_frame(self):
-#         ret, image = self.video.read()
-#         ret, jpeg = cv2.imencode('.jpg', image)
+        url = f'rtsp://{credential.username}:{credential.password}@{credential.host}'
+        if kwargs.get('detail_route'):
+            url += kwargs['detail_route']
 
-#         return jpeg.tobytes()
+        self.camera = cv2.VideoCapture(url)
+
+        if not self.camera.isOpened():
+            message = 'No se puede acceder a ' + url
+            raise RefusedConnection(message)
+
+        thread = threading.Thread(target=self.cam_buffer)
+        thread.daemon = True
+        thread.start()
+
+    def cam_buffer(self):
+        while True:
+            with self.lock:
+                successful_read, self.last_frame = self.camera.read()
+
+        if not successful_read:
+            message = 'No se pueden leer mas fotogramas'
+            raise ClosedConnection(message)
+
+    def release(self):
+        if self.camera:
+            self.camera.release()
+
+    def get_frame(self):
+        if self.last_frame is None:
+            message = 'No se pueden leer mas fotogramas'
+            raise ClosedConnection(message)
+
+        return self.last_frame
 
 
 class RefusedConnection(Exception):
