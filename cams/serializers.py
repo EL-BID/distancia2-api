@@ -24,7 +24,8 @@ class ChannelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Channel
         fields = ('id', 'name', 'state', 'enabled', 'process_id',
-            'camera_interface', 'last_connection', 'image_stream', 'last_record')
+            'camera_interface', 'last_connection', 'image_stream', 'last_record',
+            'longitude', 'latitude')
 
     def get_image_stream(self, instance):
         return reverse_lazy('image_stream', args=[instance.pk],

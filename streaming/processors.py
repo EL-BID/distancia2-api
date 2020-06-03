@@ -1,11 +1,19 @@
 
 import os
+import logging
 import itertools
 
 from django.conf import settings
 from scipy.spatial import distance
 import numpy as np
 import cv2
+
+if settings.MODEL_ENABLE_GPU:
+    from streaming.gpu import Network
+else:
+    from streaming.cpu import Network
+
+logger = logging.getLogger('ProcesingRoutine')
 
 ORI_X = 0
 ORI_Y = 1
@@ -21,59 +29,27 @@ DARK_COLOR_TEXT = (0, 0, 0)
 THICKNESS_LINE = 2
 
 class CamProcessor:
-    def __init__(self):
-        self.args = {
+    def __init__(self, **kwargs):
+        self.people_height = settings.MODEL_PEOPLE_HEIGHT
+        self.secure_distance = settings.SECURE_DISTANCE
+
+        network_settings = {
+            'weightsPath': settings.BASE_DIR(settings.MODEL_WEIGHTS_PATH),
+            'configPath': settings.BASE_DIR(settings.MODEL_CONFIG_PATH),
+            'labelsPath': settings.BASE_DIR(settings.MODEL_LABELS_PATH),
             'threshold': settings.MODEL_THRESHOLD,
             'confidence': settings.MODEL_CONFIDENCE,
-            'people_height': settings.MODEL_PEOPLE_HEIGHT,
-            'secure_distance': settings.SECURE_DISTANCE
         }
 
-        weightsPath = settings.BASE_DIR(settings.MODEL_WEIGHTS_PATH)
-        configPath = settings.BASE_DIR(settings.MODEL_CONFIG_PATH)
-        self.net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
+        if settings.MODEL_ENABLE_GPU:
+            if 'gpu_name' not in kwargs:
+                raise Exception('No se esta el parametro "gpu_name".')
+            network_settings['gpu_name'] = kwargs['gpu_name']
 
-        if settings.MODEL_ENABLE_CUDA:
-            self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-            self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
-
-        self.ln = self.net.getLayerNames()
-        self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
-
-    def make_boxes(self, image):
-        (H, W) = image.shape[:2]
-        blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
-        net = self.net
-        args = self.args
-        ln = self.ln
-        net.setInput(blob)
-        layerOutputs = self.net.forward(self.ln)
-        boxes = []
-        confidences = []
-        classIDs = []    
-        for output in layerOutputs:
-            for detection in output:
-                scores = detection[5:]
-                classID = np.argmax(scores)
-                confidence = scores[classID]
-                if confidence > args["confidence"] and classID == PERSON_CLASS_ID:
-                    box = detection[0:4] * np.array([W, H, W, H])
-                    (centerX, centerY, width, height) = box.astype("int")
-                    x = int(centerX - (width / 2))
-                    y = int(centerY - (height / 2))
-                    boxes.append([x, y, int(width), int(height)])
-                    confidences.append(float(confidence))
-                    classIDs.append(classID)
-        idxs = np.array(sorted(cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"], args["threshold"])))
-        if len(idxs) > 0:
-            boxes = np.array(boxes)[idxs[:,0]]
-            confidences = np.array(confidences)[idxs[:,0]]
-            classIDs = np.array(classIDs)[idxs[:,0]]
-        else:
-            boxes = np.array([])
-            confidences = np.array([])
-            classIDs = np.array([])
-        return boxes
+        try:
+            self.net = Network(**network_settings)
+        except Exception as error:
+            logger.error(error)
 
     def mesure_distance(self, boxes):
         get_lower_center = lambda box: (box[ORI_X] + box[WIDTH] // 2, box[ORI_Y] + box[HEIGHT])
@@ -85,8 +61,8 @@ class CamProcessor:
             base_box_b = get_lower_center(box_b)
 
             euclidean_distance = distance.euclidean(base_box_a, base_box_b)
-            height_box_a = self.args['people_height'] / box_a[HEIGHT]
-            height_box_b = self.args['people_height'] / box_b[HEIGHT]
+            height_box_a = self.people_height / box_a[HEIGHT]
+            height_box_b = self.people_height / box_b[HEIGHT]
 
             l1 = f(box_a[HEIGHT] / box_b[HEIGHT])
             l2 = 1 - l1
@@ -116,7 +92,7 @@ class CamProcessor:
             cv2.rectangle(image, edge_0, edge_1, COLOR_PEOPLE_BOX, THICKNESS_LINE)
 
         for line in distance_lines:
-            line_color = COLOR_CLOSE_LINE if line[4] < self.args['secure_distance'] else COLOR_FAR_LINE
+            line_color = COLOR_CLOSE_LINE if line[4] < self.secure_distance else COLOR_FAR_LINE
             image = cv2.line(image, line[2], line[3], line_color, THICKNESS_LINE)
 
             e = ((np.array(line[2])+np.array(line[3]))/2).astype(int)
@@ -132,7 +108,7 @@ class CamProcessor:
 
         if amount_people > 1:
             minimal_distance = min([line[4] for line in distance_lines])
-            breaking_secure_distance = sum([line[4] < self.args['secure_distance'] for line in distance_lines])
+            breaking_secure_distance = sum([line[4] < self.secure_distance for line in distance_lines])
             average_distance = np.mean([line[4] for line in distance_lines])
         else:
             minimal_distance = 0
@@ -150,7 +126,7 @@ class CamProcessor:
         frame = cv2.resize(frame, (640, 360),
             fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
 
-        boxes = self.make_boxes(frame)
+        boxes = self.net.make_boxes(frame)
         distance_lines = self.mesure_distance(boxes)
         shorter_distance_lines = self.get_min_distances(distance_lines)
 

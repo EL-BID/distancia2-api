@@ -35,11 +35,11 @@ def processing_routine(channel):
         logger.info(f'Retaken channel {channel.name}')
         return processing_routine(channel)
 
-    processor = CamProcessor()
+    processor = CamProcessor(**input_config)
 
     channel.state = Channel.STATE_ACTIVE
     channel.save(update_fields=['state'])
-    logger.debug(f"Attached to channel {channel.name}")
+    logger.debug(f"Conectado al canal {channel.name}.")
 
     while not _quit:
         try:
@@ -51,7 +51,7 @@ def processing_routine(channel):
             channel.save(update_fields=['state'])
             logger.error(err)
             time.sleep(RETAKE_TIMEOUT)
-            logger.info(f'Retaken channel {channel.name}')
+            logger.info(f'Retomando canal {channel.name}.')
             return processing_routine(channel)
 
         except Exception as err:
@@ -70,7 +70,7 @@ def processing_routine(channel):
 
     channel.state = Channel.STATE_INACTIVE
     channel.save(update_fields=['state'])
-    logger.info('Interrupted routine by keyboard.')
+    logger.info('Rutina interrumpida por teclado.')
 
 def main(channel_id=None):
     global _quit
@@ -78,6 +78,8 @@ def main(channel_id=None):
 
     channels = Channel.objects.filter(enabled=True,
         process_id__startswith=server_name)
+
+    logger.info(f'Inicializando: Se procesaran {len(channels)} canales.')
 
     try:
         if channel_id:

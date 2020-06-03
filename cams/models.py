@@ -65,8 +65,8 @@ class Channel(models.Model):
         choices=CAMERA_INTERFACE_CHOICES)
     last_connection = models.DateTimeField(blank=True, null=True)
     config = JSONField()
-    latitude = models.FloatField(default=0)
     longitude = models.FloatField(default=0)
+    latitude = models.FloatField(default=0)
     credential = models.ForeignKey('RemoteCredential',
         on_delete=models.SET_NULL, blank=True, null=True)
     objects = ChannelManager()
