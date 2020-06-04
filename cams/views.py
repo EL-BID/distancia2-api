@@ -22,7 +22,7 @@ def image_stream(request, channel_id):
             content_type='multipart/x-mixed-replace; boundary=frame')
     except Exception as err:
         print(err)
-        raise err
+        raise Http404('No se ha iniciado el streaming')
 
 
 class ChannelViewSet(viewsets.ReadOnlyModelViewSet):

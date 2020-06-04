@@ -35,8 +35,8 @@ if DEBUG:
     ALLOWED_HOSTS = ['*']
     CORS_ORIGIN_ALLOW_ALL = True
 else:
-    ALLOWED_HOSTS = ['.distancia2.com']
-    CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?distancia2\.com$', )
+    ALLOWED_HOSTS = ['.distancia2.com', env('APP_HOST')]
+    CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?(\w+\.)?distancia2\.com$', r'^(https?://)?' + env('APP_HOST') + r'$')
 
 
 # Application definition
@@ -149,10 +149,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static-backend/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static-backend/')
 
 NOTEBOOK_ARGUMENTS = [
     '--ip', '0.0.0.0', 
+    '--port', '8888', 
     '--allow-root',
     '--no-browser', 
 ]

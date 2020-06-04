@@ -6,7 +6,6 @@ scipy==1.4.1
 # opencv-python==4.2.0.34
 # pip install tensorflow-gpu
 
-
 # Web Server
 redis==3.5.1
 mysqlclient==1.4.6
@@ -16,6 +15,7 @@ django-environ==0.4.5
 django-extensions==2.2.9
 django-cors-headers==3.2.1
 djangorestframework==3.11.0
+gunicorn==20.0.4
 
 # Development
 # jupyterlab==2.1.2
