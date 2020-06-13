@@ -53,9 +53,6 @@ class RedisCamera(Camera):
     client = None
 
     def __init__(self, access_key=None, **kwargs):
-        if not access_key:
-            message = 'No se encuentra el access_key en la configuracion'
-            raise RefusedConnection(message)
 
         self.key = access_key
         self.client = redis.Redis(
@@ -75,6 +72,10 @@ class RedisCamera(Camera):
             self.client.close()
 
     def get_frame(self):
+        if not self.key:
+            message = 'No se encuentra el access_key en la configuracion'
+            raise RefusedConnection(message)
+
         raw_frame = self.client.get(self.key)
 
         if not raw_frame:
@@ -83,11 +84,11 @@ class RedisCamera(Camera):
 
         return raw_frame
 
-    def send_frame(self, frame):
-        successful_send = self.client.set(self.key, frame, ex=30)
+    def send_frame(self, key, frame):
+        successful_send = self.client.set(key, frame, ex=30)
 
         if not successful_send:
-            message = f'No pudo enviar el fotogama por "{self.key}"' 
+            message = f'No pudo enviar el fotogama por "{key}"' 
             raise ClosedConnection(message)
 
 

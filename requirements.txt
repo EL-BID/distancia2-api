@@ -19,4 +19,3 @@ gunicorn==20.0.4
 
 # Development
 # jupyterlab==2.1.2
-# django-extensions==2.2.9
