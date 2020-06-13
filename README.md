@@ -1,31 +1,48 @@
+# Distancia2 (Backend)
 
+Distancia2 es un aplicación que permite analizar vídeo proveniente de cámaras,
+detectando la cantidad de personas presentes en la imagen y calculando la distancia
+entre cada persona con modelos de inteligencia artificial.
 
-## Instalación de Dependencias
+## Características Principales
 
-Las siguientes instrucciones son para realizar las dependencias de la aplicación en sistema operativo Ubuntu, tales con bases de datos.
+- Uso de librerías, dependendencias y tecnologias de software libre.
+- Conexión sencilla y escalable para analisis de múltiples cámaras simultáneamente.
+- Panel de visualización en tiempo real de las cámaras conectadas.
+- Panel de adminstración de fácil uso para configuración de las cámaras.
+- Almacenamiento de registros históricos en una base de datos, que permite un posterior analisis de los datos.
+- En cada registro históricos se especifica información estadística y gráfica de la posición de cada personas.
 
-### MySQL
+## Tecnologías Utilizadas
 
-How To Install MySQL on Ubuntu 18.04
-https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-18-04
+- Python
+- Tensorflow
+- Django
+- MySQL
+- NGINX
+- Redis
+- React.js
+- Plotly
 
-sudo apt update
-sudo apt install mysql-server
-sudo apt install libmysqlclient-dev
-sudo mysql
+## Guia de Instalación
 
-sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
-bind-address            = 0.0.0.0
-sudo systemctl restart mysql
+Ver anexo 1
 
-CREATE USER 'dist2_app'@'%' IDENTIFIED BY 'distancia2.password';
-GRANT ALL PRIVILEGES ON *.* TO 'dist2_app'@'%' WITH GRANT OPTION;
-CREATE DATABASE distancia2;
+## Guia de Usuario
 
-### Nginx
+Ver anexo 2
 
-sudo apt install nginx
+## Licencia
 
-### Redis
+Creative Commons IGO 3.0
 
-sudo apt install redis
+## ¿Cómo contribuir?
+
+Por favor comunicarse a través de la siguiente dirección de correo: ine-tsp@iadb.org
+
+## Contribuidores
+
+- Joan Cerretani
+- Joschuan Santana
+- José Maria Marquez
+- Katherine Denis

@@ -14,7 +14,7 @@ import os
 import environ
 
 env = environ.Env()
-env.read_env('distancia2/devel.env')
+env.read_env('distancia2/prod.env')
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
