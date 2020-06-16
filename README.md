@@ -4,6 +4,14 @@ Distancia2 es un aplicación que permite analizar vídeo proveniente de cámaras
 detectando la cantidad de personas presentes en la imagen y calculando la distancia
 entre cada persona con modelos de inteligencia artificial.
 
+El proyecto está dividido en dos repositorios, uno correspondiente al backend que contiene el API
+con la conexión a la base de datos, administración del contenido de la plataforma, procesos
+automáticos entre otros scripts, mientras que el otro repositorio contiene el frontend solo con
+con el código fuente para el despliegue de la interfaz web.
+
+- [Repositorio Backend](https://gitlab.com/josch_san/distancia2-api)
+- [Repositorio Frontend](https://gitlab.com/josch_san/distancia2-web)
+
 ## Características Principales
 
 - Uso de librerías, dependendencias y tecnologias de software libre.
@@ -26,7 +34,7 @@ entre cada persona con modelos de inteligencia artificial.
 
 ## Guia de Instalación
 
-Ver anexo 1
+[Vínculo guia de instalación](https://gitlab.com/josch_san/distancia2-api/DEPLOYMENT.md)
 
 ## Guia de Usuario
 
@@ -34,7 +42,7 @@ Ver anexo 2
 
 ## Licencia
 
-Creative Commons IGO 3.0
+[AM-331-A3 Licencia de Software](https://gitlab.com/josch_san/distancia2-api/LICENSE.md)
 
 ## ¿Cómo contribuir?
 
