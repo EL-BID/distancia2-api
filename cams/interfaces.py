@@ -101,7 +101,7 @@ class RTSPCamera(Camera):
             message = 'No posee ninguna credencial asociada'
             raise RefusedConnection(message)
 
-        url = f'rtsp://{credential.username}:{credential.password}@{credential.host}'
+        url = f'rtsp://{credential.username}:{credential.password}@{credential.host}:{credential.port}'
         if kwargs.get('detail_route'):
             url += kwargs['detail_route']
 

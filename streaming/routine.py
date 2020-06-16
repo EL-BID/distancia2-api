@@ -11,10 +11,13 @@ from cams.models import Channel, Record, Alarm
 from streaming.processors import CamProcessor
 from streaming.utils import frame_to_jpg
 
-LOGGING_FORMAT = '%(asctime)s [%(processName)s_%(thread)s]: %(message)s'
-logging.basicConfig(level=logging.DEBUG,
-    format=LOGGING_FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
-logger = logging.getLogger('ProcesingRoutine')
+LOGGING_FORMAT = '%(asctime)s %(funcName)s|%(lineno)d [%(threadName)s]: %(message)s'
+file_handler = logging.handlers.TimedRotatingFileHandler('/opt/dist2/logs/cam_processing', 'midnight')
+
+logging.basicConfig(level=logging.INFO,
+    format=LOGGING_FORMAT, handlers=[file_handler],
+    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 RETAKE_TIMEOUT = 60
 _quit = False
@@ -39,10 +42,10 @@ def connect_camera(channel):
         channel.state = Channel.STATE_FAILED
         channel.save(update_fields=['state'])
         active = False
-
-    channel.state = Channel.STATE_ACTIVE
-    channel.save(update_fields=['state'])
-    logger.debug(f"Conectado al canal {channel.name}.")
+    else:
+        channel.state = Channel.STATE_ACTIVE
+        channel.save(update_fields=['state'])
+        logger.debug(f"Conectado al canal {channel.name}.")
 
     return {
         'active': active,
@@ -56,7 +59,6 @@ def processing_routine(channels):
         redis_transmitter = interfaces.RedisCamera()
     except interfaces.RefusedConnection as err:
         logger.error(err)
-        time.sleep(RETAKE_TIMEOUT)
         return
 
     processor = CamProcessor(**channels[0].config)
@@ -64,7 +66,7 @@ def processing_routine(channels):
 
     while not _quit:
         now = dt.datetime.now()
-        for index, camera in enumerate(cameras):
+        for index, camera in enumerate(cameras.copy()):
             if not camera['active']:
                 if now > camera['last_conection_try'] + dt.timedelta(seconds=RETAKE_TIMEOUT):
                     logger.info(f"Reconectando canal {camera['channel'].name}...")
@@ -81,16 +83,22 @@ def processing_routine(channels):
             except Exception as err:
                 camera['channel'].state = Channel.STATE_FAILED
                 camera['channel'].save(update_fields=['state'])
+                cameras[index]['active'] = False
                 logger.error(err)
                 continue
 
             logger.debug(f"Capturadas {results['statistical']['amount_people']} personas en {camera['channel'].name}")
 
             redis_transmitter.send_frame(
+                camera['channel'].config['access_key'],
                 frame_to_jpg(results['frame'])
             )
             Record.objects.create(graphical=results['graphical'],
                 channel=camera['channel'], **results['statistical'])
+
+        if not any([cam['active'] for cam in cameras]):
+            logger.info('No se pudo conectar a ninguna camara')
+            time.sleep(RETAKE_TIMEOUT)
 
     for camera in cameras:
         camera['channel'].state = Channel.STATE_INACTIVE
@@ -111,8 +119,11 @@ def main():
     logger.info(f'Inicializando: Se procesaran {len(channels)} canales.')
 
     try:
-        with ThreadPoolExecutor(max_workers=len(channels_by_thread)) as executor:
-            executor.map(processing_routine, channels_by_thread.values())
-            # executor.submit(supervisor, index)
+        with ThreadPoolExecutor(max_workers=len(channels_by_thread), thread_name_prefix='Thread') as executor:
+            # executor.map(processing_routine, channels_by_thread.values())
+            for channel_group in channels_by_thread.values():
+                executor.submit(processing_routine, channel_group)
+                time.sleep(5)
+
     except KeyboardInterrupt:
         _quit = True
