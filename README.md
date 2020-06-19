@@ -34,7 +34,7 @@ con el código fuente para el despliegue de la interfaz web.
 
 ## Guia de Instalación
 
-[Vínculo guia de instalación](https://github.com/EL-BID/distancia2-api/DEPLOYMENT.md)
+[Vínculo guia de instalación](https://github.com/EL-BID/distancia2-api/blob/master/DEPLOYMENT.md)
 
 ## Guia de Usuario
 
@@ -42,7 +42,7 @@ Ver anexo 2
 
 ## Licencia
 
-[AM-331-A3 Licencia de Software](https://github.com/EL-BID/distancia2-api/LICENSE.md)
+[AM-331-A3 Licencia de Software](https://github.com/EL-BID/distancia2-api/blob/master/LICENSE.md)
 
 ## ¿Cómo contribuir?
 
