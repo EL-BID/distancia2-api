@@ -72,7 +72,7 @@ Creación de carpeta para el proyecto, asignación de permisos y bajada del re
 ```
 sudo mkdir /opt/dist2; sudo chmod 777 /opt/dist2
 cd /opt/dist2
-git clone https://gitlab.com/josch_san/distancia2-api.git
+git clone https://github.com/EL-BID/distancia2-api.git
 ```
 
 Armado del entorno virtual para instalación y despliegue
@@ -150,7 +150,7 @@ Compilación del código fuente del frontend
 ```
 sudo apt install nodejs -y
 cd /opt/dist2
-git clone https://gitlab.com/josch_san/distancia2-web.git
+git clone https://github.com/EL-BID/distancia2-web.git
 cd distancia2-web/
 ```
 

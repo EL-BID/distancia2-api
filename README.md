@@ -9,8 +9,8 @@ con la conexión a la base de datos, administración del contenido de la platafo
 automáticos entre otros scripts, mientras que el otro repositorio contiene el frontend solo con
 con el código fuente para el despliegue de la interfaz web.
 
-- [Repositorio Backend](https://gitlab.com/josch_san/distancia2-api)
-- [Repositorio Frontend](https://gitlab.com/josch_san/distancia2-web)
+- [Repositorio Backend](https://github.com/EL-BID/distancia2-api)
+- [Repositorio Frontend](https://github.com/EL-BID/distancia2-web)
 
 ## Características Principales
 
@@ -34,7 +34,7 @@ con el código fuente para el despliegue de la interfaz web.
 
 ## Guia de Instalación
 
-[Vínculo guia de instalación](https://gitlab.com/josch_san/distancia2-api/DEPLOYMENT.md)
+[Vínculo guia de instalación](https://github.com/EL-BID/distancia2-api/DEPLOYMENT.md)
 
 ## Guia de Usuario
 
@@ -42,7 +42,7 @@ Ver anexo 2
 
 ## Licencia
 
-[AM-331-A3 Licencia de Software](https://gitlab.com/josch_san/distancia2-api/LICENSE.md)
+[AM-331-A3 Licencia de Software](https://github.com/EL-BID/distancia2-api/LICENSE.md)
 
 ## ¿Cómo contribuir?
 
