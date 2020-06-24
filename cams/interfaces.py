@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
 import threading
+import logging
+import time
 
 import redis
 from redis.exceptions import TimeoutError
 from django.conf import settings
 import cv2
+
+logger = logging.getLogger(__name__)
 
 def frame_generator(camera):
     while True:
@@ -101,14 +105,23 @@ class RTSPCamera(Camera):
             message = 'No posee ninguna credencial asociada'
             raise RefusedConnection(message)
 
-        url = f'rtsp://{credential.username}:{credential.password}@{credential.host}:{credential.port}'
-        if kwargs.get('detail_route'):
-            url += kwargs['detail_route']
+        self.url = f'rtsp://{credential.username}:{credential.password}@{credential.host}:{credential.port}'
+        if kwargs.get('camera_reference'):
+            self.url += kwargs['camera_reference']
 
-        self.camera = cv2.VideoCapture(url)
+        self.connect()
+
+    def connect(self):
+        for connection_try in range(5):
+            self.camera = cv2.VideoCapture(self.url)
+            if self.camera.isOpened():
+                break
+            else:
+                logger.warning(f'{connection_try} intentos de conexion a {self.url}')
+                time.sleep(2)
 
         if not self.camera.isOpened():
-            message = 'No se puede acceder a ' + url
+            message = 'No se puede acceder a ' + self.url
             raise RefusedConnection(message)
 
         thread = threading.Thread(target=self.cam_buffer)
@@ -118,21 +131,19 @@ class RTSPCamera(Camera):
     def cam_buffer(self):
         while True:
             with self.lock:
-                successful_read, self.last_frame = self.camera.read()
+                successful_read, frame = self.camera.read()
 
-        if not successful_read:
-            message = 'No se pueden leer mas fotogramas'
-            raise ClosedConnection(message)
+            if successful_read:
+                self.last_frame = frame
+            else:
+                message = 'Se ha cortado la comunicación'
+                raise ClosedConnection(message)
 
     def release(self):
         if self.camera:
             self.camera.release()
 
     def get_frame(self):
-        if self.last_frame is None:
-            message = 'Se ha cortado la comunicación'
-            raise ClosedConnection(message)
-
         return self.last_frame
 
 
