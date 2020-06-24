@@ -29,7 +29,7 @@ DARK_COLOR_TEXT = (0, 0, 0)
 THICKNESS_LINE = 2
 
 class CamProcessor:
-    def __init__(self, **kwargs):
+    def __init__(self, processor_name, **kwargs):
         self.people_height = settings.MODEL_PEOPLE_HEIGHT
         self.secure_distance = settings.SECURE_DISTANCE
 
@@ -42,9 +42,7 @@ class CamProcessor:
         }
 
         if settings.MODEL_ENABLE_GPU:
-            if 'gpu_name' not in kwargs:
-                raise Exception('No se esta el parametro "gpu_name".')
-            network_settings['gpu_name'] = kwargs['gpu_name']
+            network_settings['gpu_name'] = processor_name
 
         try:
             self.net = Network(**network_settings)

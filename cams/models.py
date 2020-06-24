@@ -8,31 +8,6 @@ from distancia2.fields import JSONField
 logger = logging.getLogger()
 
 
-class ChannelManager(models.Manager):
-    def get_and_lock(self, camera_interface, cameras_number):
-        queryset = self.get_queryset().filter(camera_interface=camera_interface, state=Channel.STATE_INACTIVE)
-        channels_available_count = queryset.count()
-
-        if not channels_available_count:
-            logger.warning('Do not have cameras availables to be analized.')
-            return queryset
-
-        if channels_available_count < cameras_number:
-            logger.warning(f'Will be analized {channels_available_count} cameras availables.')
-            cameras_locked = channels_available_count
-
-        else:
-            cameras_locked = cameras_number
-
-        new_qs = []
-        for channel in queryset[:cameras_locked]:
-            channel.state = Channel.STATE_LOCKED
-            channel.save(update_fields=['state'])
-            new_qs.append(channel)
-
-        return new_qs
-
-
 class Channel(models.Model):
     STATE_ACTIVE = 'active'
     STATE_INACTIVE = 'inactive'
@@ -51,9 +26,9 @@ class Channel(models.Model):
     ]
 
     CAMERA_INTERFACE_CHOICES = [
-        (LOCAL_FILE_INTERFACE, LOCAL_FILE_INTERFACE),
+        # (LOCAL_FILE_INTERFACE, LOCAL_FILE_INTERFACE),
         (RTSP_INTERFACE, RTSP_INTERFACE),
-        (REDIS_INTERFACE, REDIS_INTERFACE),
+        # (REDIS_INTERFACE, REDIS_INTERFACE),
     ]
 
     name = models.CharField(max_length=256)
@@ -61,15 +36,15 @@ class Channel(models.Model):
         default=STATE_INACTIVE, choices=STATE_CHOICES)
     enabled = models.BooleanField(default=False)
     process_id = models.CharField(max_length=100, blank=True)
+    processor_name = models.CharField(max_length=100, blank=True)
+    camera_reference = models.CharField(max_length=100)
     camera_interface = models.CharField(max_length=100,
         choices=CAMERA_INTERFACE_CHOICES)
     last_connection = models.DateTimeField(blank=True, null=True)
-    config = JSONField()
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
     credential = models.ForeignKey('RemoteCredential',
         on_delete=models.SET_NULL, blank=True, null=True)
-    objects = ChannelManager()
 
     def __str__(self):
         return self.name
@@ -88,6 +63,10 @@ class Channel(models.Model):
     def last_record(self):
         return self.records.first()
 
+    @property
+    def access_key(self):
+        return f'{type(self).__name__}_{self.id}'
+
     # def release(self)
 
 
@@ -103,6 +82,9 @@ class Record(models.Model):
 
     class Meta:
         ordering = ['-date']
+        indexes = [
+            models.Index(fields=['-date'], name='date_index'),
+        ]
 
 
 class Alarm(models.Model):

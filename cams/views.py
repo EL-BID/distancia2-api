@@ -16,7 +16,7 @@ def image_stream(request, channel_id):
         raise Http404('Este canal no existe')
 
     try:
-        camera_interface = interfaces.RedisCamera(**channel.config)
+        camera_interface = interfaces.RedisCamera(access_key=channel.access_key)
 
         return StreamingHttpResponse(interfaces.frame_generator(camera_interface),
             content_type='multipart/x-mixed-replace; boundary=frame')

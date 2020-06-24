@@ -19,3 +19,4 @@ gunicorn==20.0.4
 
 # Development
 # jupyterlab==2.1.2
+# matplotlib==3.2.2

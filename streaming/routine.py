@@ -24,7 +24,9 @@ _quit = False
 
 def connect_camera(channel):
     active = True
-    input_config = channel.config
+    input_config = {
+        'camera_reference': channel.camera_reference
+    }
     if channel.credential:
         input_config['credential'] = channel.credential
 
@@ -61,7 +63,7 @@ def processing_routine(channels):
         logger.error(err)
         return
 
-    processor = CamProcessor(**channels[0].config)
+    processor = CamProcessor(channels[0].processor_name)
     cameras = [connect_camera(channel) for channel in channels]
 
     while not _quit:
@@ -90,7 +92,7 @@ def processing_routine(channels):
             logger.debug(f"Capturadas {results['statistical']['amount_people']} personas en {camera['channel'].name}")
 
             redis_transmitter.send_frame(
-                camera['channel'].config['access_key'],
+                camera['channel'].access_key,
                 frame_to_jpg(results['frame'])
             )
             Record.objects.create(graphical=results['graphical'],

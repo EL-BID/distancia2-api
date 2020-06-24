@@ -11,6 +11,9 @@ __pycache__/
 .Python
 env/
 build/
+videos/
+yolo-coco/
+notebooks/
 develop-eggs/
 dist/
 downloads/
