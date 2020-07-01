@@ -137,6 +137,7 @@ class CamProcessor:
             'graphical': {
                 'boxes': boxes,
                 'distance_lines': distance_lines,
+                'shorter_distance_lines': shorter_distance_lines
             },
             'statistical': statistical
         }

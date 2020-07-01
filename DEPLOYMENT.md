@@ -56,7 +56,7 @@ sudo apt install redis
 ### Dependencias
 ```
 sudo apt update
-sudo apt install git build-essential
+sudo apt install git build-essential libsm6 libxext6 libxrender-dev
 ```
 
 ### Python
@@ -94,7 +94,7 @@ pip install tensorflow-gpu==2.2.0
 
 Creación de los esquemas en la Base de Datos
 ```
-cd distancia2-api
+cd /opt/dist2/distancia2-api
 cp distancia2/devel.env distancia2/prod.env
 python manage.py makemigrations cams
 python manage.py migrate
@@ -152,12 +152,12 @@ Compilación del código fuente del frontend
 sudo apt install nodejs -y
 cd /opt/dist2
 git clone https://github.com/EL-BID/distancia2-web.git
-cd distancia2-web/
 ```
 
 Instalación de dependencias. Puede variar en función al servidor en el que se instale,
 la dirección IP o el DNS.
 ```
+cd /opt/dist2/distancia2-web/
 npm install
 cp .env.development .env.production
 ```
@@ -167,4 +167,16 @@ fuente para producción
 ```
 nano .env.production
 npm run-script build
+```
+
+## Troubleshoots
+
+### FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+
+Durante el proceso de compilación del frontend es posible que muestre un mensaje de que se quede sin memoria.
+Esto ocurre porque en algunas instalaciones queda  una catidad de memoria máxima especifica que se utilizará
+durante el proceso de compilacion y tal vez necesite mas que esa cantidad, en ese caso pondemos ejecutar el comando
+`npm run-script build` con un parametro para cambiar la cantidad de memoria que podrá utilizar.
+```
+NODE_OPTIONS="--max-old-space-size=4096" npm run-script build
 ```
