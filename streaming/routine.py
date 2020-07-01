@@ -77,16 +77,20 @@ def processing_routine(channels):
 
             try:
                 raw_frame = camera['interface'].get_frame()
+                logger.debug(f"{camera['channel'].name}: consulta exitosa.")
                 results = processor.inference(raw_frame)
 
             except KeyboardInterrupt as err:
                 raise err
 
+            except interfaces.UnavailableFrame:
+                continue
+
             except Exception as err:
                 camera['channel'].state = Channel.STATE_FAILED
                 camera['channel'].save(update_fields=['state'])
                 cameras[index]['active'] = False
-                logger.error(err)
+                logger.error(f"{camera['channel'].name}: {err}")
                 continue
 
             logger.debug(f"Capturadas {results['statistical']['amount_people']} personas en {camera['channel'].name}")

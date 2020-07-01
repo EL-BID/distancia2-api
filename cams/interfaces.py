@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-import threading
+import threading, queue
+import datetime as dt
 import logging
 import time
 
@@ -97,8 +98,11 @@ class RedisCamera(Camera):
 
 
 class RTSPCamera(Camera):
-    last_frame = None
+    frame_queue = queue.Queue(1)
+    last_update = None
     lock = threading.Lock()
+
+    FRAME_WAIT_TIMEOUT = 30
 
     def __init__(self, credential=None, **kwargs):
         if not credential:
@@ -124,6 +128,7 @@ class RTSPCamera(Camera):
             message = 'No se puede acceder a ' + self.url
             raise RefusedConnection(message)
 
+        self.last_update = dt.datetime.now()
         thread = threading.Thread(target=self.cam_buffer)
         thread.daemon = True
         thread.start()
@@ -134,7 +139,13 @@ class RTSPCamera(Camera):
                 successful_read, frame = self.camera.read()
 
             if successful_read:
-                self.last_frame = frame
+                if self.frame_queue.full():
+                    try:
+                        self.frame_queue.get_nowait()
+                    except queue.Empty:
+                        pass
+                self.frame_queue.put_nowait(frame)
+                self.last_update = dt.datetime.now()
             else:
                 message = 'Se ha cortado la comunicación'
                 raise ClosedConnection(message)
@@ -144,7 +155,15 @@ class RTSPCamera(Camera):
             self.camera.release()
 
     def get_frame(self):
-        return self.last_frame
+        try:
+            return self.frame_queue.get_nowait()
+        except queue.Empty:
+            timeout = self.last_update + dt.timedelta(seconds=self.FRAME_WAIT_TIMEOUT)
+            if dt.datetime.now() > timeout:
+                message = 'Se ha superado el tiempo de espera por el fotograma.'
+                raise RefusedConnection(message)
+
+            raise UnavailableFrame()
 
 
 class RefusedConnection(Exception):
@@ -152,4 +171,8 @@ class RefusedConnection(Exception):
 
 
 class ClosedConnection(Exception):
+    pass
+
+
+class UnavailableFrame(Exception):
     pass
