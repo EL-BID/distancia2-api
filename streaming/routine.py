@@ -64,15 +64,17 @@ def processing_routine(channels):
         return
 
     processor = CamProcessor(channels[0].processor_name)
-    cameras = [connect_camera(channel) for channel in channels]
+    cameras = {channel.access_key: connect_camera(channel) for channel in channels}
 
     while not _quit:
         now = dt.datetime.now()
-        for index, camera in enumerate(cameras.copy()):
+        for access_key in cameras.keys():
+            camera = cameras[access_key]
+
             if not camera['active']:
                 if now > camera['last_conection_try'] + dt.timedelta(seconds=RETAKE_TIMEOUT):
                     logger.info(f"Reconectando canal {camera['channel'].name}...")
-                    cameras[index] = connect_camera(camera['channel'])
+                    cameras[access_key] = connect_camera(camera['channel'])
                 continue
 
             try:
@@ -87,26 +89,23 @@ def processing_routine(channels):
                 continue
 
             except Exception as err:
-                camera['channel'].state = Channel.STATE_FAILED
-                camera['channel'].save(update_fields=['state'])
-                cameras[index]['active'] = False
+                cameras[access_key]['channel'].state = Channel.STATE_FAILED
+                cameras[access_key]['channel'].save(update_fields=['state'])
+                cameras[access_key]['active'] = False
                 logger.error(f"{camera['channel'].name}: {err}")
                 continue
 
             logger.debug(f"Capturadas {results['statistical']['amount_people']} personas en {camera['channel'].name}")
 
-            redis_transmitter.send_frame(
-                camera['channel'].access_key,
-                frame_to_jpg(results['frame'])
-            )
+            redis_transmitter.send_frame(access_key, frame_to_jpg(results['frame']))
             Record.objects.create(graphical=results['graphical'],
                 channel=camera['channel'], **results['statistical'])
 
-        if not any([cam['active'] for cam in cameras]):
+        if not any([cam['active'] for cam in cameras.values()]):
             logger.info('No se pudo conectar a ninguna camara')
             time.sleep(RETAKE_TIMEOUT)
 
-    for camera in cameras:
+    for camera in cameras.values():
         camera['channel'].state = Channel.STATE_INACTIVE
         camera['channel'].save(update_fields=['state'])
 

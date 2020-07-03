@@ -146,6 +146,13 @@ Es posible editar las configuraciones de camaras desde `http://localhost/admin`
 Copiar el código del modelo que se utilizará (en este caso yolo-coco) y configurarlo en las variables
 del archivo `distancia2/prod.env`
 
+Para instalar y habilitar el servicio que se encarga de analizar las cámaras se ejecuta lo siguiente
+```
+sudo cp /opt/dist2/distancia2-api/production/camprocess.service /etc/systemd/system
+sudo systemctl start camprocess
+sudo systemctl enable camprocess
+``` 
+
 ## Frontend
 Compilación del código fuente del frontend
 ```

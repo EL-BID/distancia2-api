@@ -98,13 +98,12 @@ class RedisCamera(Camera):
 
 
 class RTSPCamera(Camera):
-    frame_queue = queue.Queue(1)
-    last_update = None
-    lock = threading.Lock()
-
-    FRAME_WAIT_TIMEOUT = 30
+    FRAME_WAIT_TIMEOUT = 60
 
     def __init__(self, credential=None, **kwargs):
+        self.frame_queue = queue.Queue(1)
+        self.last_update = None
+
         if not credential:
             message = 'No posee ninguna credencial asociada'
             raise RefusedConnection(message)
@@ -135,20 +134,21 @@ class RTSPCamera(Camera):
 
     def cam_buffer(self):
         while True:
-            with self.lock:
-                successful_read, frame = self.camera.read()
+            successful_read, frame = self.camera.read()
+            if not successful_read:
+                break
 
-            if successful_read:
-                if self.frame_queue.full():
-                    try:
-                        self.frame_queue.get_nowait()
-                    except queue.Empty:
-                        pass
-                self.frame_queue.put_nowait(frame)
-                self.last_update = dt.datetime.now()
-            else:
-                message = 'Se ha cortado la comunicación'
-                raise ClosedConnection(message)
+            if self.frame_queue.full():
+                try:
+                    self.frame_queue.get_nowait()
+                except queue.Empty:
+                    pass
+
+            self.frame_queue.put_nowait(frame)
+            self.last_update = dt.datetime.now()
+
+        message = 'Se ha cortado la comunicación'
+        raise ClosedConnection(message)
 
     def release(self):
         if self.camera:
