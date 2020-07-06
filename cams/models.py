@@ -67,7 +67,9 @@ class Channel(models.Model):
     def access_key(self):
         return f'{type(self).__name__}_{self.id}'
 
-    # def release(self)
+    @classmethod
+    def get_access_key(cls, _id):
+        return f'{cls.__name__}_{_id}'
 
 
 class Record(models.Model):

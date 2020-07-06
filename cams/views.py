@@ -10,13 +10,13 @@ from cams.serializers import ChannelSerializer, RecordSerializer
 
 @gzip.gzip_page
 def image_stream(request, channel_id): 
-    try:
-        channel = Channel.objects.get(pk=channel_id)
-    except Channel.DoesNotExist:
+    if not Channel.objects.filter(pk=channel_id).exists():
         raise Http404('Este canal no existe')
 
     try:
-        camera_interface = interfaces.RedisCamera(access_key=channel.access_key)
+        camera_interface = interfaces.RedisCamera(
+            access_key=Channel.get_access_key(channel_id)
+        )
 
         return StreamingHttpResponse(interfaces.frame_generator(camera_interface),
             content_type='multipart/x-mixed-replace; boundary=frame')

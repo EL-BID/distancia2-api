@@ -6,7 +6,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/dist2/distancia2-api
-ExecStart=/opt/dist2/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/opt/dist2/distancia2.sock distancia2.wsgi
+ExecStart=/opt/dist2/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/opt/dist2/distancia2.sock --timeout 60 --log-file /opt/dist2/logs/gunicorn.log distancia2.wsgi
 Restart=always
 KillSignal=SIGQUIT
 Type=notify

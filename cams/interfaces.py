@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 def frame_generator(camera):
     while True:
+        if not camera.has_new_frame():
+            time.sleep(.2)
+            continue
+
         frame = camera.get_frame()
         yield(b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
@@ -26,16 +30,18 @@ class Camera(ABC):
     def release(self):
         pass
 
+    def has_new_frame(self):
+        return True
+
     @abstractmethod
     def get_frame(self):
         pass
 
 
 class LocalFileCamera(Camera):
-    def __init__(self, file_path=None, **kwargs):
-        self.camera = cv2.VideoCapture(
-            settings.BASE_DIR(file_path)
-        )
+    def __init__(self, camera_reference=None, **kwargs):
+        file_path = settings.BASE_DIR(camera_reference)
+        self.camera = cv2.VideoCapture(file_path)
 
         if not self.camera.isOpened():
             message = 'No se puede leer el archivo ' + file_path
@@ -56,9 +62,9 @@ class LocalFileCamera(Camera):
 
 class RedisCamera(Camera):
     client = None
+    last_frame = 'first_catch'
 
     def __init__(self, access_key=None, **kwargs):
-
         self.key = access_key
         self.client = redis.Redis(
             host=settings.REDIS_HOST,
@@ -76,12 +82,17 @@ class RedisCamera(Camera):
         if self.client:
             self.client.close()
 
+    def has_new_frame(self):
+        last_ts = self.client.get(f'{self.key}_ts')
+        return self.last_frame != last_ts
+
     def get_frame(self):
         if not self.key:
             message = 'No se encuentra el access_key en la configuracion'
             raise RefusedConnection(message)
 
         raw_frame = self.client.get(self.key)
+        self.last_frame = self.client.get(f'{self.key}_ts')
 
         if not raw_frame:
             message = f'No hay fotogramas disponibles para "{self.key}"' 
@@ -95,6 +106,8 @@ class RedisCamera(Camera):
         if not successful_send:
             message = f'No pudo enviar el fotogama por "{key}"' 
             raise ClosedConnection(message)
+
+        self.client.set(f'{key}_ts', dt.datetime.now().isoformat())
 
 
 class RTSPCamera(Camera):
