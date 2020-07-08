@@ -153,12 +153,6 @@ Es posible editar las configuraciones de camaras desde `http://localhost/admin`
 Es necesario copiar el modelo que se utilizará (en este caso yolo-coco)
 y configurarlo en las variables del archivo `distancia2/prod.env`
 
-```
-cd /opt/dist2/distancia2-api
-git clone https://github.com/josch-san/distancia2-yolo.git
-mv distancia2-yolo yolo-coco
-```
-
 ## Frontend
 Instalación de Node.js
 cd ~
