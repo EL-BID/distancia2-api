@@ -61,11 +61,14 @@ sudo apt install git build-essential libsm6 libxext6 libxrender-dev
 
 ### Python
 ```
+cd ~
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
 bash ~/miniconda.sh
 ```
 
-Aceptar los terminos y continuar hasta finalizar
+En el formulario de instalación se presentará los términos licencia del software que deberan ser aceptados,
+se puede mantener el directorio por defecto de instalación y hay que habilitar la inicialización de miniconda
+que por defecto va deshabilitado.
 
 ### Configuración
 Creación de carpeta para el proyecto, asignación de permisos y bajada del repositorio
@@ -101,9 +104,12 @@ python manage.py migrate
 ```
 
 El archivo copiado contiene variables de configuración de la base de datos que puede
-ser editado en caso de ser necesario. Para verificar que se instaló correctamente se puede
-probar el acceso a través del navegador `http://localhost:8000/api`
+ser editado en caso de ser necesario. Los ajustes principales serian cambiar la configuración
+a produccion `DEBUG=false` y la dirección IP del servidor `APP_HOST='<direccion_ip>'`
+Para verificar que se instaló correctamente se puede probar el acceso a través del
+navegador `http://<direccion_ip>/api`
 ```
+nano distancia2/prod.env
 python manage.py runserver
 ```
 
@@ -143,20 +149,25 @@ sudo systemctl enable gunicorn
 ```
 
 Es posible editar las configuraciones de camaras desde `http://localhost/admin`
-Copiar el código del modelo que se utilizará (en este caso yolo-coco) y configurarlo en las variables
-del archivo `distancia2/prod.env`
 
-Para instalar y habilitar el servicio que se encarga de analizar las cámaras se ejecuta lo siguiente
+Es necesario copiar el modelo que se utilizará (en este caso yolo-coco)
+y configurarlo en las variables del archivo `distancia2/prod.env`
+
 ```
-sudo cp /opt/dist2/distancia2-api/production/camprocess.service /etc/systemd/system
-sudo systemctl start camprocess
-sudo systemctl enable camprocess
-``` 
+cd /opt/dist2/distancia2-api
+git clone https://github.com/josch-san/distancia2-yolo.git
+mv distancia2-yolo yolo-coco
+```
 
 ## Frontend
+Instalación de Node.js
+cd ~
+curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
+sudo bash nodesource_setup.sh
+sudo apt install nodejs
+
 Compilación del código fuente del frontend
 ```
-sudo apt install nodejs -y
 cd /opt/dist2
 git clone https://github.com/EL-BID/distancia2-web.git
 ```
@@ -169,12 +180,24 @@ npm install
 cp .env.development .env.production
 ```
 
-Editar dirección IP del servidor en la red correspondiente y compilar del código
-fuente para producción
+Editar la url en que se encuentra desplegado el backend del servidor en la red correspondiente
+(ej. `http://<direccion_ip>/api`) y compilar del código fuente para producción
 ```
 nano .env.production
 npm run-script build
 ```
+
+Despues de desplegar el frontend ya podrá hacer las configuraciones de las cámaras a traves de la
+interfazde administrador.
+
+## Procesador de Cámaras
+
+Para instalar y habilitar el servicio que se encarga de analizar las cámaras se ejecuta lo siguiente
+```
+sudo cp /opt/dist2/distancia2-api/production/camprocess.service /etc/systemd/system
+sudo systemctl start camprocess
+sudo systemctl enable camprocess
+``` 
 
 ## Troubleshoots
 
