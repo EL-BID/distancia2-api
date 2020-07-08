@@ -121,6 +121,11 @@ def main():
     channels_by_thread = defaultdict(list)
     [channels_by_thread[channel.process_id].append(channel) for channel in channels]
 
+    if not channels_by_thread:
+        logger.error(f'No hay canales habilitados disponibles para el servidor {server_name}.')
+        time.sleep(300)
+        return
+
     logger.info(f'Inicializando: Se procesaran {len(channels)} canales.')
 
     try:
@@ -132,3 +137,6 @@ def main():
 
     except KeyboardInterrupt:
         _quit = True
+
+    except:
+        return
