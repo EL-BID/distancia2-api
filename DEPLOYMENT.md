@@ -155,10 +155,12 @@ y configurarlo en las variables del archivo `distancia2/prod.env`
 
 ## Frontend
 Instalación de Node.js
+```
 cd ~
 curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh
 sudo apt install nodejs
+```
 
 Compilación del código fuente del frontend
 ```

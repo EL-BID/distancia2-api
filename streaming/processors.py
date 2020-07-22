@@ -49,7 +49,7 @@ class CamProcessor:
         except Exception as error:
             logger.error(error)
 
-    def mesure_distance(self, boxes):
+    def distance_measure(self, boxes):
         get_lower_center = lambda box: (box[ORI_X] + box[WIDTH] // 2, box[ORI_Y] + box[HEIGHT])
         f = lambda x: np.arctan(x) / (np.pi/2)
 
@@ -125,7 +125,7 @@ class CamProcessor:
             fx=0, fy=0, interpolation=cv2.INTER_LINEAR)
 
         boxes = self.net.make_boxes(frame)
-        distance_lines = self.mesure_distance(boxes)
+        distance_lines = self.distance_measure(boxes)
         shorter_distance_lines = self.get_min_distances(distance_lines)
 
         statistical = self.calculate_statistical_results(boxes, shorter_distance_lines)
