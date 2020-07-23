@@ -9,8 +9,8 @@ WorkingDirectory=/opt/dist2/distancia2-api
 ExecStart=/opt/dist2/env/bin/python /opt/dist2/distancia2-api/cameras_processing.py
 Restart=always
 KillSignal=SIGQUIT
-StandardInput=tty-force
-Type=simple
+Type=notify
+NotifyAccess=all
 
 [Install]
 WantedBy=multi-user.target
