@@ -1,8 +1,18 @@
+import logging
 import tensorflow as tf
 import numpy as np
 from scipy.spatial import distance
 from tensorflow.keras import Model
 from tensorflow.keras.layers import BatchNormalization, Conv2D, Input, ZeroPadding2D, LeakyReLU, UpSampling2D
+
+logger = logging.getLogger()
+
+physical_devices = tf.config.list_physical_devices('GPU')
+for device in physical_devices:
+    try:
+        tf.config.experimental.set_memory_growth(device, True)
+    except:
+        logger.error(f'Invalid device or cannot modify virtual devices once initialized {device}')
 
 def parse_cfg(cfgfile):
     with open(cfgfile, 'r') as file:
