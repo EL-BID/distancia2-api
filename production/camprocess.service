@@ -6,8 +6,10 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/dist2/distancia2-api
+ExecStartPre=/bin/sleep 60
 ExecStart=/opt/dist2/env/bin/python /opt/dist2/distancia2-api/cameras_processing.py
 Restart=always
+TimeoutSec=infinity
 KillSignal=SIGQUIT
 Type=notify
 NotifyAccess=all
