@@ -6,6 +6,8 @@ import datetime as dt
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
+from django.conf import settings
+
 from cams import interfaces
 from cams.models import Channel, Record, Alarm
 from streaming.processors import CamProcessor
@@ -19,7 +21,6 @@ logging.basicConfig(level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
-RETAKE_TIMEOUT = 60
 _quit = False
 
 def connect_camera(channel):
@@ -72,7 +73,7 @@ def processing_routine(channels):
             camera = cameras[access_key]
 
             if not camera['active']:
-                if now > camera['last_conection_try'] + dt.timedelta(seconds=RETAKE_TIMEOUT):
+                if now > camera['last_conection_try'] + dt.timedelta(seconds=settings.RETAKE_CAMERA_TIMEOUT):
                     logger.info(f"Reconectando canal {camera['channel'].name}...")
                     cameras[access_key] = connect_camera(camera['channel'])
                 continue
@@ -103,7 +104,7 @@ def processing_routine(channels):
 
         if not any([cam['active'] for cam in cameras.values()]):
             logger.info('No se pudo conectar a ninguna camara')
-            time.sleep(RETAKE_TIMEOUT)
+            time.sleep(settings.RETAKE_CAMERA_TIMEOUT)
 
     for camera in cameras.values():
         camera['channel'].state = Channel.STATE_INACTIVE

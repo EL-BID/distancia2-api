@@ -56,7 +56,7 @@ sudo apt install redis
 ### Dependencias
 ```
 sudo apt update
-sudo apt install git build-essential libsm6 libxext6 libxrender-dev
+sudo apt install git curl build-essential libsm6 libxext6 libxrender-dev
 ```
 
 ### Python
@@ -90,10 +90,9 @@ Instalación paquetes de Python en el entorno virtual
 /opt/dist2/env/bin/pip install -r distancia2-api/requirements.txt
 ```
 
-En caso de contar con una tarjeta gráfica, ejecutar para rendimiento óptimo de la librería
-```
-pip install tensorflow-gpu==2.2.0
-```
+Configuración de GPU:
+En caso de contar con una tarjeta gráfica, puede acceder al instructivo para realizar
+la instalación basada en GPU: [Instalación de GPU](https://github.com/EL-BID/distancia2-api/blob/master/GPU_INSTALL.md)
 
 Creación de los esquemas en la Base de Datos
 ```
@@ -105,13 +104,15 @@ python manage.py migrate
 
 El archivo copiado contiene variables de configuración de la base de datos que puede
 ser editado en caso de ser necesario. Los ajustes principales serian cambiar la configuración
-a produccion `DEBUG=false` y la dirección IP del servidor `APP_HOST='<direccion_ip>'`
-Para verificar que se instaló correctamente se puede probar el acceso a través del
-navegador `http://<direccion_ip>/api`
+a produccion `DEBUG=false` y la dirección IP del servidor `APP_HOST='<direccion_ip>'`.
 ```
 nano distancia2/prod.env
 python manage.py runserver
 ```
+
+Nota: En caso de utilizar la configuración con GPU debe editar tambien los parametros
+`MODEL_ENABLE_GPU=true`, comentar el parametro `# MODEL_WEIGHTS_PATH='yolo-coco/yolov3.weights'`
+y descomentar `MODEL_WEIGHTS_PATH='yolo-coco/tf2/yolov3_weights.tf'`
 
 Debe arrojar la siguiente información
 ```
@@ -141,14 +142,23 @@ sudo ln -s /etc/nginx/sites-available/distancia2.conf /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 ```
 
+Será necesario cambiar el parametro `server_name` en el archivo de configuración
+con la direccion ip correspondiente
+```
+sudo nano /etc/nginx/sites-available/distancia2.conf
+server_name <direccion_ip>;
+```
+
 Se habilita el archivo de configuración del servicio para el backend
 ```
 sudo cp /opt/dist2/distancia2-api/production/gunicorn.service /etc/systemd/system
-sudo systemctl start gunicorn
 sudo systemctl enable gunicorn
+sudo systemctl start gunicorn
 ```
 
-Es posible editar las configuraciones de camaras desde `http://localhost/admin`
+Para verificar que se instaló correctamente se puede probar el acceso a través del
+navegador `http://<direccion_ip>/api`. Es posible editar las configuraciones de cámaras
+desde `http://localhost/admin`
 
 Es necesario copiar el modelo que se utilizará (en este caso yolo-coco)
 y configurarlo en las variables del archivo `distancia2/prod.env`
@@ -176,10 +186,16 @@ npm install
 cp .env.development .env.production
 ```
 
-Editar la url en que se encuentra desplegado el backend del servidor en la red correspondiente
-(ej. `http://<direccion_ip>/api`) y compilar del código fuente para producción
+Editar la url en que se encuentra desplegado el backend del servidor en la red
+correspondiente sin el puerto
 ```
 nano .env.production
+REACT_APP_API_URL=http://<direccion_ip>/api
+```
+
+y compilar del código fuente para producción. En caso de que presente un error de compilación
+consultar la sección de Troubleshoots.
+```
 npm run-script build
 ```
 
@@ -191,8 +207,8 @@ interfazde administrador.
 Para instalar y habilitar el servicio que se encarga de analizar las cámaras se ejecuta lo siguiente
 ```
 sudo cp /opt/dist2/distancia2-api/production/camprocess.service /etc/systemd/system
-sudo systemctl start camprocess
 sudo systemctl enable camprocess
+sudo systemctl start camprocess
 ``` 
 
 ## Troubleshoots

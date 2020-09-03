@@ -31,7 +31,6 @@ THICKNESS_LINE = 2
 class CamProcessor:
     def __init__(self, processor_name, **kwargs):
         self.people_height = settings.MODEL_PEOPLE_HEIGHT
-        self.secure_distance = settings.SECURE_DISTANCE
 
         network_settings = {
             'weightsPath': settings.BASE_DIR(settings.MODEL_WEIGHTS_PATH),
@@ -90,7 +89,7 @@ class CamProcessor:
             cv2.rectangle(image, edge_0, edge_1, COLOR_PEOPLE_BOX, THICKNESS_LINE)
 
         for line in distance_lines:
-            line_color = COLOR_CLOSE_LINE if line[4] < self.secure_distance else COLOR_FAR_LINE
+            line_color = COLOR_CLOSE_LINE if line[4] < settings.SECURE_DISTANCE else COLOR_FAR_LINE
             image = cv2.line(image, line[2], line[3], line_color, THICKNESS_LINE)
 
             e = ((np.array(line[2])+np.array(line[3]))/2).astype(int)
@@ -106,7 +105,7 @@ class CamProcessor:
 
         if amount_people > 1:
             minimal_distance = min([line[4] for line in distance_lines])
-            breaking_secure_distance = sum([line[4] < self.secure_distance for line in distance_lines])
+            breaking_secure_distance = sum([line[4] < settings.SECURE_DISTANCE for line in distance_lines])
             average_distance = np.mean([line[4] for line in distance_lines])
         else:
             minimal_distance = 0
