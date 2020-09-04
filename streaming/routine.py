@@ -29,7 +29,7 @@ def connect_camera(channel):
         'camera_reference': channel.camera_reference
     }
     if channel.credential:
-        input_config['credential'] = channel.credential
+        input_config['url'] = channel.url
 
     InterfaceClass = getattr(interfaces, channel.camera_interface, None)
     if not InterfaceClass:

@@ -113,18 +113,15 @@ class RedisCamera(Camera):
 class RTSPCamera(Camera):
     FRAME_WAIT_TIMEOUT = 60
 
-    def __init__(self, credential=None, **kwargs):
+    def __init__(self, url=None, **kwargs):
         self.frame_queue = queue.Queue(1)
         self.last_update = None
 
-        if not credential:
+        if not url:
             message = 'No posee ninguna credencial asociada'
             raise RefusedConnection(message)
 
-        self.url = f'rtsp://{credential.username}:{credential.password}@{credential.host}:{credential.port}'
-        if kwargs.get('camera_reference'):
-            self.url += kwargs['camera_reference']
-
+        self.url = url
         self.connect()
 
     def connect(self):
@@ -177,6 +174,14 @@ class RTSPCamera(Camera):
                 raise RefusedConnection(message)
 
             raise UnavailableFrame()
+
+
+class HTTPCamera(RTSPCamera):
+    pass
+
+
+class HTTPSCamera(RTSPCamera):
+    pass
 
 
 class RefusedConnection(Exception):
