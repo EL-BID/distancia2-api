@@ -35,6 +35,10 @@ con el código fuente para el despliegue de la interfaz web.
 - React.js
 - Plotly
 
+## Modelo de Machine Learning utilizado
+
+Como base para este proyecto se utiliza una versión personalizada a las necesidades del modelo yolo-coco perteneciente al proyecto open source **Darknet** que es un neural network framework escrito en C y CUDA. Para mas información diríjase al [vínculo del proyecto](https://github.com/pjreddie/darknet).
+
 ## Guia de Instalación
 
 [Vínculo guia de instalación](https://github.com/EL-BID/distancia2-api/blob/master/DEPLOYMENT.md)
@@ -53,7 +57,7 @@ Por favor comunicarse a través de la siguiente dirección de correo: ine-tsp@ia
 
 ## Contribuidores
 
-- Joan Cerretani
-- Joschuan Santana
-- José Maria Marquez
-- Katherine Denis
+- [Joan Cerretani](https://www.linkedin.com/in/joancerretani/)
+- [Joschuan Santana](https://www.linkedin.com/in/joschuansantana/)
+- [José Maria Marquez](https://www.linkedin.com/in/jose-maria-marquez-blanco/)
+- [Katherine Denis](https://www.linkedin.com/in/katherinedenis/)

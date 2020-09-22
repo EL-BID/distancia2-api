@@ -6,7 +6,8 @@ optimizar la velocidad de ejecución del software.
 
 Para la ejecucion del sistema basado en GPU se utiliza la libreria tensorflow, la cual
 tiene mayor soporte en tarjetas graficas de la marca Nvidia. Para una ejecución optima se recomienda
-utilizar los siguientes modelos disponibles en el mercado link de soporte de tarjetas (link).
+utilizar uno de los siguientes modelos con un *Compute Capability* mayor o igual a **6.1** disponibles
+en el mercado link de soporte de tarjetas [Soporte CUDA](https://developer.nvidia.com/cuda-gpus).
 
 Será necesaria la instalación de los drivers de la tarjeta grafica, las librerias de cuda y tensorflow.
 
