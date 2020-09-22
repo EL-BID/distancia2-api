@@ -41,14 +41,9 @@ GRANT ALL PRIVILEGES ON *.* TO 'dist2_app'@'%' WITH GRANT OPTION;
 CREATE DATABASE distancia2;
 exit;
 ```
-### Nginx
+### Nginx y Redis
 ```
-sudo apt install nginx
-```
-
-### Redis
-```
-sudo apt install redis
+sudo apt install nginx redis
 ```
 
 ## Backend
@@ -56,7 +51,9 @@ sudo apt install redis
 ### Dependencias
 ```
 sudo apt update
-sudo apt install git curl build-essential libsm6 libxext6 libxrender-dev
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo apt install git git-lfs curl build-essential libsm6 libxext6 libxrender-dev
+git lfs install
 ```
 
 ### Python
