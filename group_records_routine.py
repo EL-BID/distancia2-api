@@ -41,6 +41,23 @@ def count_people_breaking_distance(graphical):
         for box in [line[0], line[1]]
     ]))
 
+def init_routine():
+    utcnow = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+    today = utcnow.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # TODO: change date sorter on database
+    first_record = Record.objects.last()
+    first_date = first_record.date.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    if today == first_date:
+        logger.warning('La rutina inicializará despues del primer dia de procesamiento')
+        return
+
+    logger.info(f'Se inciara la primera rutina de procesamiento desde {first_date} hasta {today}')
+
+    for delta in range((today - first_date).days):
+        group_records(first_date + dt.timedelta(days=delta))
+
 def group_records(first_date=None):
     utcnow = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
 
@@ -48,8 +65,7 @@ def group_records(first_date=None):
         last_record = GroupedRecord.objects.first()
 
         if last_record is None:
-            logger.warning('Debe inicializar la rutina con un registro manualmente')
-            return
+            return init_routine()
         first_date = last_record.group_date + dt.timedelta(minutes=30)
 
     if first_date.date() < utcnow.date():
