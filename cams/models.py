@@ -155,3 +155,23 @@ class RemoteCredential(models.Model):
         if camera_reference is not None:
             url += camera_reference
         return url
+
+
+class GroupedRecord(models.Model):
+    group_date = models.DateTimeField()
+    creation_date = models.DateTimeField(auto_now_add=True)
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE,
+        related_name='grouped_records', related_query_name='grouped_record')
+    amount_records = models.IntegerField()
+    amount_people = models.IntegerField()
+    amount_people_breaking_secure_distance = models.IntegerField()
+    minimal_distance = models.FloatField()
+    average_distance = models.FloatField()
+    percentile90_amount_people = models.FloatField()
+
+    class Meta:
+        ordering = ['-group_date']
+        unique_together = ['channel', 'group_date']
+        indexes = [
+            models.Index(fields=['-group_date'], name='group_date_index'),
+        ]
