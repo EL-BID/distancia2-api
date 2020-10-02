@@ -206,7 +206,20 @@ Para instalar y habilitar el servicio que se encarga de analizar las cámaras se
 sudo cp /opt/dist2/distancia2-api/production/camprocess.service /etc/systemd/system
 sudo systemctl enable camprocess
 sudo systemctl start camprocess
-``` 
+```
+
+## Proceso de agrupación de datos
+
+Con el objetivo de hacer mas ligera la lectura de los datos correspondientes a los registros capturados
+por las cámaras asociadas al sistema, existe este proceso el cual agrupa los datos en ventanas de tiempo
+de media hora lo cual facilita la lectura por parte de los tableros de control estadisticos de los datos.
+
+Este proceso se anexa al cron del sistema operativo para ejecutarse cada media hora y se almacenan en una tabla
+adicional de la base de datos. Para ello debe agregar la instrucción en la ultima linea de configuración del cron.
+```
+sudo EDITOR=nano crontab -e
+5,35 * * * * cd /opt/dist2/distancia2-api && /opt/dist2/env/bin/python /opt/dist2/distancia2-api/group_records_routine.py
+```
 
 ## Troubleshoots
 

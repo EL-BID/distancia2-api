@@ -1,4 +1,4 @@
-# sudo crontab -e
+# sudo EDITOR=nano crontab -e
 # 5,35 * * * * cd /opt/dist2/distancia2-api && /opt/dist2/env/bin/python /opt/dist2/distancia2-api/group_records_routine.py
 
 import os
