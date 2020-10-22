@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 from django.db import models
+from django.conf import settings
 from django.core.validators import RegexValidator
 from distancia2.fields import JSONField
 
@@ -83,7 +84,10 @@ class Channel(models.Model):
 
     @property
     def last_record(self):
-        return self.records.first()
+        if settings.QUERY_LAST_RECORD:
+            return self.records.first()
+        else:
+            return None
 
     @property
     def url(self):

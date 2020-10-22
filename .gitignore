@@ -45,3 +45,6 @@ migrations/
 
 .env
 db.sqlite3
+
+distancia2/prod.env
+static-backend/

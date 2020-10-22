@@ -18,7 +18,7 @@ Sistema operativo Ubuntu 18.04 o superior
 
 ```
 sudo apt update
-sudo apt install mysql-server libmysqlclient-dev
+sudo apt -y install mysql-server libmysqlclient-dev
 ```
 
 Editar la dirección IP en el archivo de configuración de MySQL para poder ser accedido desde un
@@ -43,7 +43,7 @@ exit;
 ```
 ### Nginx y Redis
 ```
-sudo apt install nginx redis
+sudo apt -y install nginx redis
 ```
 
 ## Backend
@@ -51,9 +51,8 @@ sudo apt install nginx redis
 ### Dependencias
 ```
 sudo apt update
+sudo apt -y install git git-lfs curl build-essential libsm6 libxext6 libxrender-dev
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt install git git-lfs curl build-essential libsm6 libxext6 libxrender-dev
-git lfs install
 ```
 
 ### Python
@@ -74,6 +73,7 @@ sudo mkdir /opt/dist2; sudo chmod 777 /opt/dist2
 mkdir /opt/dist2/logs
 cd /opt/dist2
 git clone https://github.com/EL-BID/distancia2-api.git
+git lfs install
 ```
 
 Armado del entorno virtual para instalación y despliegue
@@ -166,7 +166,7 @@ Instalación de Node.js
 cd ~
 curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh
-sudo apt install nodejs
+sudo apt -y install nodejs
 ```
 
 Compilación del código fuente del frontend

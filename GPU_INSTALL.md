@@ -9,7 +9,10 @@ tiene mayor soporte en tarjetas graficas de la marca Nvidia. Para una ejecución
 utilizar uno de los siguientes modelos con un *Compute Capability* mayor o igual a **6.1** disponibles
 en el mercado link de soporte de tarjetas [Soporte CUDA](https://developer.nvidia.com/cuda-gpus).
 
-Será necesaria la instalación de los drivers de la tarjeta grafica, las librerias de cuda y tensorflow.
+Será necesaria la instalación de los drivers de la tarjeta graáfica, las librerias de cuda y tensorflow.
+
+Nota: Es importante desabilitar el security boot a nivel del BIOS para que no interfiera con la
+instalación de los drivers de la tarjeta gráfica.
 
 Verificar tarjetas graficas instaladas
 ```
