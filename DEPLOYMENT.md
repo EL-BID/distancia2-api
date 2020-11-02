@@ -73,7 +73,6 @@ sudo mkdir /opt/dist2; sudo chmod 777 /opt/dist2
 mkdir /opt/dist2/logs
 cd /opt/dist2
 git clone https://github.com/EL-BID/distancia2-api.git
-git lfs install
 ```
 
 Armado del entorno virtual para instalación y despliegue
@@ -94,6 +93,8 @@ la instalación basada en GPU: [Instalación de GPU](https://github.com/EL-BID/d
 Creación de los esquemas en la Base de Datos
 ```
 cd /opt/dist2/distancia2-api
+git lfs install
+git lfs pull
 cp distancia2/devel.env distancia2/prod.env
 python manage.py makemigrations cams
 python manage.py migrate

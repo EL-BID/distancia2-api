@@ -21,19 +21,19 @@ lspci | grep VGA
 
 Agregar repositorios de paquetes de Nvidia
 ```
+cd ~
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.1.243-1_amd64.deb
 sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-trobleshoot wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | sudo apt-key add -
 sudo dpkg -i cuda-repo-ubuntu1804_10.1.243-1_amd64.deb
-sudo apt-get update
+sudo apt update
 wget http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb
 sudo apt install ./nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb
-sudo apt-get update
+sudo apt update
 ```
 
-Instalar drivers de Nvidia
+Instalar drivers de Nvidia y reiniciar
 ```
-sudo apt-get install --no-install-recommends nvidia-driver-450
+sudo apt -y install --no-install-recommends nvidia-driver-450
 sudo reboot
 ```
 
@@ -44,7 +44,7 @@ nvidia-smi
 
 Instalar librerias de desarrollo y producción (~4GB)
 ```
-sudo apt-get install --no-install-recommends \
+sudo apt install -y --no-install-recommends \
     cuda-10-1 \
     libcudnn7=7.6.5.32-1+cuda10.1  \
     libcudnn7-dev=7.6.5.32-1+cuda10.1
@@ -52,7 +52,7 @@ sudo apt-get install --no-install-recommends \
 
 Instalacion de TensorRT. Se requiere haber instalado libcudnn7 del comando anterior
 ```
-sudo apt-get install -y --no-install-recommends libnvinfer6=6.0.1-1+cuda10.1 \
+sudo apt install -y --no-install-recommends libnvinfer6=6.0.1-1+cuda10.1 \
     libnvinfer-dev=6.0.1-1+cuda10.1 \
     libnvinfer-plugin6=6.0.1-1+cuda10.1
 ```
@@ -79,3 +79,13 @@ pip install tensorflow-gpu==2.2.0
 Para mas información links de interes sobre la libreria consultar:
 
 - https://www.tensorflow.org/install/gpu#ubuntu_1804_cuda_101
+
+
+## Troubleshoots
+
+### No se puede ejecutar el comando `sudo apt-key adv --fetch-keys`
+
+En caso de que no se pueda agregar la llave, se puede utilizar este otro comando como remplazo.
+```
+wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | sudo apt-key add -
+```
