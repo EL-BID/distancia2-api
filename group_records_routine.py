@@ -82,7 +82,11 @@ def group_records(first_date=None):
     queryset = Record.objects.filter(date__gte=first_date, date__lt=last_date)
 
     if not queryset:
-        logger.warning('No hay registros para agrupar')
+        if first_date.date() < utcnow.date():
+            group_records(last_date)
+        else:
+            logger.warning('No hay registros para agrupar')
+
         return
 
     columns = ['date', 'channel_id', 'amount_people', 'graphical']
