@@ -66,8 +66,8 @@ Agregar variables de entorno de CUDA al final del archivo
 ```
 sudo nano .bashrc
 # Included to Distancia2 project
-PATH=$PATH:/usr/local/cuda-10.1/bin
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.1/lib64
+PATH=$PATH:/usr/local/cuda-11.0/bin
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-11.0/lib64
 ```
 
 Guardar el archivo y reiniciar el servidor
