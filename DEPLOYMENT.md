@@ -198,7 +198,7 @@ npm run-script build
 ```
 
 Despues de desplegar el frontend ya podrá hacer las configuraciones de las cámaras a traves de la
-interfazde administrador.
+interfaz de administrador.
 
 ## Procesador de Cámaras
 

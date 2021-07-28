@@ -78,7 +78,7 @@ sudo reboot
 Se instala la versión de tensorflow correspondiente a la GPU
 ```
 conda activate /opt/dist2/env
-pip install tensorflow-gpu==2.2.0
+pip install tensorflow-gpu==2.4.0
 ```
 
 Para mas información links de interes sobre la libreria consultar:
